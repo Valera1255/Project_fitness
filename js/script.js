@@ -209,7 +209,7 @@ window.addEventListener('DOMContentLoaded', () => {
     function showModalByScroll() {
         if (window.scrollY + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
             openModal();
-            window.removeEventListener('scroll', showModalByScroll)
+            window.removeEventListener('scroll', showModalByScroll);
         }
     }
 
@@ -343,15 +343,11 @@ window.addEventListener('DOMContentLoaded', () => {
             // МЕТОД 2 (помещение елементов в разные места верстки)
             form.insertAdjacentElement('afterend', statusMessage);
 
-
-            const request = new XMLHttpRequest();
-            request.open('POST', 'server.php');
-
             // При FormData setRequestHeader не нужен
             //request.setRequestHeader('Content-type', 'multipart/form-data');
 
             //При работе с JSON
-            request.setRequestHeader('Content-type', 'applicetion/json');
+           // request.setRequestHeader('Content-type', 'applicetion/json');
 
             // создание FormData - данные что заполнил пользователь
             const formData = new FormData (form);
@@ -360,14 +356,35 @@ window.addEventListener('DOMContentLoaded', () => {
             formData.forEach(function(value, key) {
                 object[key] = value;
             });
-            // Превращаем в JSON => object c formData
-            const json = JSON.stringify(object);
 
-            request.send(json);
+            fetch('server.php', {
+                method: 'POST',
+                headers: {'Content-type': 'applicetion/json' 
+                },
+                body: JSON.stringify(object) // Превращаем в JSON => object c formData
+            })
+            .then(data => data.text()) //данные в текстовом формате
+            .then(data => {
+                    console.log(data);
+
+                    // тут будем вызывать функцию благодарности
+                    //statusMessage.textContent = message.success;
+                    showThanksModal(message.success);
+
+
+                    // убирем таймаут (для загрузки)
+                    statusMessage.remove();
+            }).catch(() => {
+                    showThanksModal(message.failure);
+            }).finally(() =>{
+                // очистим форму
+                    form.reset();
+            })
+
             // отправка
             //request.send(formData);
             
-            request.addEventListener('load', () => {
+            /*request.addEventListener('load', () => {
                 if (request.status === 200) {
                     console.log(request.response);
 
@@ -383,7 +400,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 } else {
                     showThanksModal(message.failure);
                 }
-            });
+            });*/
         });
     }
 
@@ -421,4 +438,10 @@ window.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     }
 
+    fetch ('http://localhost:3000/menu')
+    .then(data => data.json())
+    .then(res => console.log(res));
+
 });
+
+
