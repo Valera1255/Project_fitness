@@ -275,8 +275,61 @@ window.addEventListener('DOMContentLoaded', () => {
     /*const div = new MenuCard();
     div.render();*/
 
+   // Функция на получения данных с сервра (карточки меню) - db.json
+    const getResource = async (url) => {
+        const res = await fetch(url);
+
+        // проверка на ошибки fetch запроса res.ok && res.ok , объект Ошибки
+        if (!res.ok) {
+            throw new Error (`Could not fetch ${url}, status ${res.ok}`);
+        }
+
+        return await res.json();
+    };
+
+
+    // Вариант 1 (формируєм карточки)
+    getResource('http://localhost:3000/menu')
+    .then(data => {
+        // деструктуризация
+        data.forEach(({img,altimg, title, descr, price}) => {
+            new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
+        });
+        
+        /*data.forEach(obj => {
+            new MenuCard(obj.img, obj.altimg, obj.title, obj.descr, obj.price, obj.id).render();
+        });*/
+    
+    });
+
+    // Вариант 2 (формируєм карточки)
+    
+    // getResource('http://localhost:3000/menu')
+    /*.then(data => createCard(data));
+
+    function createCard(data) {
+        data.forEach(({img, altimg, title, descr, price}) => {
+            const element = document.createElement('div');
+
+                element.classList.add('menu__item');
+
+                element.innerHTML = `
+                    <img src=${img} alt=${altimg}>
+                    <h3 class="menu__item-subtitle">${title}</h3>
+                    <div class="menu__item-descr">${descr}</div>
+                    <div class="menu__item-divider"></div>
+                    <div class="menu__item-price">
+                        <div class="menu__item-cost">Цена:</div>
+                        <div class="menu__item-total"><span>${price}</span> грн/день</div>
+                    </div>`;
+
+                    document.querySelector('.menu .container').append(element);
+            });
+        }
+
+
     // передаем аргументы (с верстки в ковычках) + добавим все карточки на страницу
-    new MenuCard(
+    /*new MenuCard(
         "img/tabs/vegy.jpg",
         "vegy",
         'Меню "Фитнес"',
@@ -284,27 +337,11 @@ window.addEventListener('DOMContentLoaded', () => {
         9,
         '.menu .container'
         // добавляєм клас который будем помещать на страницу (пишем не через точку так как мы будем его помещать в масимв и использовать в класс листе)
-    ).render();
-
-    new MenuCard(
-        "img/tabs/elite.jpg",
-        "elite",
-        'Меню “Премиум”',
-        'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
-        14,
-        '.menu .container'
-    ).render();
-
-    new MenuCard(
-        "img/tabs/post.jpg",
-        "post",
-        'Меню "Постное"',
-        'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
-        21,
-        '.menu .container'
-    ).render();
+    ).render();*/
 
     // Чтобы не сломалась верстака удаляем с HTLM статичные карточки
+
+
 
     // Forms
 
@@ -317,14 +354,26 @@ window.addEventListener('DOMContentLoaded', () => {
         failure: 'Что-то пошло не так...'
     };
 
-    //Берем все формы (перебираем их) и накладываем фупкцию postData
+    //Берем все формы (перебираем их) и накладываем функцию postData
 
     forms.forEach(item => {
-        postData(item);
+        bindpostData(item);
     });
 
+    // функция по общению с сервером (async, await) => дожидаемся ответа от сервера
+    const postData = async (url, data) => {
+        const res = await fetch(url, {
+            method: 'POST',
+                headers: {'Content-type': 'applicetion/json' 
+                },
+                body: data
+        });
 
-    function postData(form) {
+        return await res.json();
+    };
+
+    // привязка к постингу
+    function bindpostData(form) {
         // обработчик submit
         form.addEventListener('submit', (e) => {
             // отменяем старндартное поведение браузера + добавляем событие
@@ -352,18 +401,17 @@ window.addEventListener('DOMContentLoaded', () => {
             // создание FormData - данные что заполнил пользователь
             const formData = new FormData (form);
 
-            const object = {};
+            /*const object = {};
             formData.forEach(function(value, key) {
                 object[key] = value;
-            });
+            });*/
 
-            fetch('server.php', {
-                method: 'POST',
-                headers: {'Content-type': 'applicetion/json' 
-                },
-                body: JSON.stringify(object) // Превращаем в JSON => object c formData
-            })
-            .then(data => data.text()) //данные в текстовом формате
+            // Превращаем форму что собрала данные в массив массивов, для работы, после превщаем в классический объект, а после превращаем объект в JSON
+            const json = JSON.stringify(Object.fromEntries(formData.entries()));
+
+
+            // Фунуция по получению данных
+            postData('http://localhost:3000/requests', json)
             .then(data => {
                     console.log(data);
 
@@ -443,5 +491,3 @@ window.addEventListener('DOMContentLoaded', () => {
     .then(res => console.log(res));
 
 });
-
-
