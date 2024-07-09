@@ -275,8 +275,9 @@ window.addEventListener('DOMContentLoaded', () => {
     /*const div = new MenuCard();
     div.render();*/
 
-   // Функция на получения данных с сервра (карточки меню) - db.json
-    const getResource = async (url) => {
+    
+   // Функция на получения данных с сервра (карточки меню) - db.json (с библиотекой Anxios не нужны проверки)
+    /*const getResource = async (url) => {
         const res = await fetch(url);
 
         // проверка на ошибки fetch запроса res.ok && res.ok , объект Ошибки
@@ -285,25 +286,26 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         return await res.json();
-    };
+    };*/
 
 
     // Вариант 1 (формируєм карточки)
-    getResource('http://localhost:3000/menu')
-    .then(data => {
+     /*getResource('http://localhost:3000/menu')
+     .then(data => {
         // деструктуризация
         data.forEach(({img,altimg, title, descr, price}) => {
             new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
         });
         
-        /*data.forEach(obj => {
-            new MenuCard(obj.img, obj.altimg, obj.title, obj.descr, obj.price, obj.id).render();
-        });*/
+        //data.forEach(obj => {
+        //     new MenuCard(obj.img, obj.altimg, obj.title, obj.descr, obj.price, obj.id).render();
+        //});
     
-    });
+    });*/
 
-    // Вариант 2 (формируєм карточки)
-    
+
+
+    // Вариант 2 (формируєм карточки) 
     // getResource('http://localhost:3000/menu')
     /*.then(data => createCard(data));
 
@@ -342,6 +344,14 @@ window.addEventListener('DOMContentLoaded', () => {
     // Чтобы не сломалась верстака удаляем с HTLM статичные карточки
 
 
+    // Библиотека Axios
+    axios.get('http://localhost:3000/menu')
+        .then(data => {
+        // деструктуризация
+        data.data.forEach(({img,altimg, title, descr, price}) => {
+            new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
+            });
+        });
 
     // Forms
 
